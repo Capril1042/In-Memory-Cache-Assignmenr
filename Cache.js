@@ -9,6 +9,7 @@ var rl = readline.createInterface({
 let memoryMap = new Map();
 let transactionMapArray = [];
 let numberOfOpenTransactions = 0;
+let commited = false;
 rl.on('line', function (line) {
     let commandInput = line.split(" ");
     let commandArgument1 = commandInput[0];
@@ -22,7 +23,7 @@ rl.on('line', function (line) {
     switch(commandArgument1) {
         case "SET":
         console.log(numberOfOpenTransactions);
-           if (numberOfOpenTransactions > 0) {
+           if (numberOfOpenTransactions > 0 ) {
                transactionMapArray[numberOfOpenTransactions-1].set(commandArgument2,commandArgument3);
            } 
            else {
@@ -33,8 +34,10 @@ rl.on('line', function (line) {
             console.log("\n");
             break;
         case "GET":
+            console.log(memoryMap);
+            console.log(transactionMapArray);
             let newMemoryMap = transactionMapArray[numberOfOpenTransactions-1];
-            let value = numberOfOpenTransactions > 0 ? newMemoryMap.get(commandArgument2) : memoryMap.get(commandArgument2);
+            let value = numberOfOpenTransactions > 0 && commited === false ? newMemoryMap.get(commandArgument2) : memoryMap.get(commandArgument2);
             let result = value ? value : "NULL";
             console.log(`${result}\n`);
             break;
@@ -80,7 +83,17 @@ rl.on('line', function (line) {
             console.log("\n");
             break;
         case "COMMIT":
-            console.log(" FIX ME");
+            if ( numberOfOpenTransactions > 0) {
+                let transactionMap =transactionMapArray[numberOfOpenTransactions-1];
+               for (let [key, value] of transactionMap.entries()) {
+                 memoryMap.set(key,value);  
+               } 
+               console.log(memoryMap);
+               transactionMapArray.pop();
+               numberOfOpenTransactions--;
+               commited = true;
+            }
+            return numberOfOpenTransactions === 0 ? console.log("NO TRANSACTION") : console.log("\n");
             break;
 
     }
