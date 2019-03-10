@@ -6,6 +6,15 @@ var rl = readline.createInterface({
   terminal: false
 });
 
+function countRepetingValues( map, arg) {
+    let count = 0;
+      for ( let value of map.values()) {
+                if (value === arg) {
+                    count++;
+                }
+}
+return count;
+}
 let memoryMap = new Map();
 let transactionMapArray = [];
 let numberOfOpenTransactions = 0;
@@ -48,6 +57,7 @@ rl.on('line', function (line) {
         case "UNSET":
             if (numberOfOpenTransactions > 0 && commited === false ) {
                 transactionMapArray[numberOfOpenTransactions-1].delete(commandArgument2);
+                helperNumber++;
             }
             else {
                 memoryMap.delete(commandArgument2);
@@ -60,12 +70,8 @@ rl.on('line', function (line) {
             console.log("\n");
             break;
         case "NUMEQUALTO":
-            let count = 0;
-            for ( let value of memoryMap.values()) {
-                if (value === commandArgument2) {
-                    count++;
-                }
-            }
+            let mapToCount = (numberOfOpenTransactions > 0 && commited === false && helperNumber > 0) ? transactionMapArray[numberOfOpenTransactions-1] : memoryMap;
+            let count = countRepetingValues(mapToCount, commandArgument2);
             console.log(`${count}\n`);
             break;
         case "END":
@@ -83,6 +89,7 @@ rl.on('line', function (line) {
             console.log(transactionMapArray);
             transactionMapArray.pop();
             numberOfOpenTransactions--;
+            helperNumber--;
             if (numberOfOpenTransactions === 0) {
                 openTransaction = false;
                 console.log("NO TRANSACTION");
