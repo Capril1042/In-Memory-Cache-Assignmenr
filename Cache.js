@@ -10,6 +10,7 @@ let memoryMap = new Map();
 let transactionMapArray = [];
 let numberOfOpenTransactions = 0;
 let commited = false;
+let helperNumber = 0;
 rl.on('line', function (line) {
     let commandInput = line.split(" ");
     let commandArgument1 = commandInput[0];
@@ -25,6 +26,7 @@ rl.on('line', function (line) {
         console.log(numberOfOpenTransactions);
            if (numberOfOpenTransactions > 0 ) {
                transactionMapArray[numberOfOpenTransactions-1].set(commandArgument2,commandArgument3);
+                helperNumber++;
            } 
            else {
                memoryMap.set(commandArgument2,commandArgument3);
@@ -36,15 +38,25 @@ rl.on('line', function (line) {
         case "GET":
             console.log(memoryMap);
             console.log(transactionMapArray);
+            console.log(commited);
+            console.log(numberOfOpenTransactions)
             let newMemoryMap = transactionMapArray[numberOfOpenTransactions-1];
-            let value = numberOfOpenTransactions > 0 && commited === false ? newMemoryMap.get(commandArgument2) : memoryMap.get(commandArgument2);
+            let value = (numberOfOpenTransactions > 0 && commited === false && helperNumber > 0) ? newMemoryMap.get(commandArgument2) : memoryMap.get(commandArgument2);
             let result = value ? value : "NULL";
             console.log(`${result}\n`);
             break;
         case "UNSET":
-            openTransaction ?
-            transactionMapArray[numberOfOpenTransactions-1].delete(commandArgument2)
-            : memoryMap.delete(commandArgument2);
+            if (numberOfOpenTransactions > 0 && commited === false ) {
+                transactionMapArray[numberOfOpenTransactions-1].delete(commandArgument2);
+            }
+            else {
+                memoryMap.delete(commandArgument2);
+            } 
+             console.log(memoryMap);
+            console.log(transactionMapArray);
+            console.log(commited);
+            console.log(numberOfOpenTransactions);
+            console.log(helperNumber);
             console.log("\n");
             break;
         case "NUMEQUALTO":
@@ -69,11 +81,7 @@ rl.on('line', function (line) {
             break;
         case "ROLLBACK":
             console.log(transactionMapArray);
-            let rollbackCounter = numberOfOpenTransactions -1;
-            while (rollbackCounter > 0) {
-                transactionMapArray.pop();
-                rollbackCounter--;
-            }
+            transactionMapArray.pop();
             numberOfOpenTransactions--;
             if (numberOfOpenTransactions === 0) {
                 openTransaction = false;
@@ -92,8 +100,11 @@ rl.on('line', function (line) {
                transactionMapArray.pop();
                numberOfOpenTransactions--;
                commited = true;
+               console.log("\n")
             }
-            return numberOfOpenTransactions === 0 ? console.log("NO TRANSACTION") : console.log("\n");
+            else {
+                return  console.log("NO TRANSACTION");
+            }
             break;
 
     }
